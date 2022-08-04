@@ -1,0 +1,76 @@
+---
+title: "Math-Bio Project"
+author: "Hidaya Patel"
+date: "4/10/2022"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# MATH-BIO PROJECT 
+
+## SEIR MODEL IMPLEMENTATION 
+
+```{r}
+# Using Library Desolve
+library(deSolve)
+
+# Using the SEIR function in the Desolve library
+SEIR <- function(time, current_state, params){
+  
+  with(as.list(c(current_state, params)),{
+    N <- S+E+I+R
+    dS <- -(beta*S*I)/N
+    dE <- (beta*S*I)/N - sigma*E
+    dI <- sigma*E - gamma*I - mu*I
+    dR <- gamma*I
+    dM <- mu*I
+    
+    return(list(c(dS, dE, dI, dR, dM)))
+  })
+}
+
+# Setting the parameters to specific assumed values
+params <- c(beta=0.5, sigma=0.25, gamma=0.2, mu=0.001)
+
+# Assuming the susceptible to be 999999, Exposed to 1 and the rest to 0
+initial_state <- c(S=999999, E=1, I=0, R=0, M=0)
+
+# Generating vector from 0 to 365 days
+times <- 0:365
+
+# Modeling the ordinary equations
+model <- ode(initial_state, times, SEIR, params)
+
+# Printing summary of the model
+summary(model)
+```
+## Analyzing the results we notice that: -
+
+  From our assumption of million individuals 108,264 have not been
+  infected whereas 126,516 were infected. As for the recovered, 887,300 
+  individuals were recovered in the end.
+  A total of 4436 resulted to be fatal.
+
+
+```{r}
+# Plotting the model 
+matplot(model, type="l", lty=1, main="SEIR model", xlab="Time")
+
+legend <- colnames(model)[2:6]
+
+legend("right", legend=legend, col=2:6, lty = 1)
+```
+```{r}
+infections <- as.data.frame(model)$I
+
+peak <- max(infections)
+
+match(peak, infections)
+```
+## Here we can see that the number of infections peaked on day 112.
+
